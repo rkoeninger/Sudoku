@@ -1,9 +1,11 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 
 import Data.Set (Set, difference, unions, fromList, findMin, notMember, singleton, size)
-import qualified Data.Set (filter)
-import Data.List (nub)
+import qualified Data.Set (filter, size)
+import Data.List (nub, minimumBy)
 import Data.List.Split (chunksOf)
+import Data.Function (on)
+import Data.Maybe (listToMaybe)
 
 type Cell = Set Int
 type Grid = [[Cell]]
@@ -11,8 +13,14 @@ type Coord = (Int, Int)
 
 allPossibles = fromList [1..9]
 allIndicies = [0..8]
-gridCoords = map (\i -> map (\j -> (i, j)) [0..8]) [0..8]
+gridCoords = map (\i -> map (\j -> (i, j)) allIndicies) allIndicies
 allCoords = [(r, c) | r <- allIndicies, c <- allIndicies]
+allRowCoords = gridCoords
+allColCoords = map (\j -> map (\i -> (i, j)) allIndicies) allIndicies
+getBoxCoords index = (slice div gridCoords) >>= (slice mod)
+    where slice f list = take 3 (drop ((f index 3) * 3) list)
+allBoxCoords = map getBoxCoords allIndicies
+allGroups = concat [allRowCoords, allColCoords, allBoxCoords]
 blankGrid = replicate 9 (replicate 9 allPossibles)
 setupGrid :: [[Int]] -> Grid = map (map (\x -> if x == 0 then allPossibles else singleton x))
 

@@ -1,11 +1,8 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 
-import Data.Set (Set, difference, unions, fromList, findMin, notMember, singleton, size)
-import qualified Data.Set (filter, size)
-import Data.List (nub, minimumBy)
-import Data.List.Split (chunksOf)
-import Data.Function (on)
-import Data.Maybe (listToMaybe)
+import Data.Set (Set, difference, fromList, findMin, notMember, singleton, size)
+import qualified Data.Set (filter)
+import Data.List (nub)
 
 type Cell = Set Int
 type Grid = [[Cell]]
@@ -102,3 +99,6 @@ reduce grid = (map . map) (reduceCell grid) gridCoords
 
 deduce :: Grid -> Grid
 deduce grid = (map . map) (deduceCell grid) gridCoords
+
+test :: Grid
+test = (deduce . reduce . deduce . reduce . deduce . reduce . deduce . reduce . deduce . reduce . setupGrid) [[0,0,7,1,8,0,0,4,0],[0,0,4,0,0,0,8,0,0],[8,0,0,0,0,6,2,5,0],[0,4,0,0,9,8,7,1,0],[1,0,0,3,0,5,0,0,6],[0,9,5,2,1,0,0,8,0],[0,2,1,7,0,0,0,0,8],[0,0,3,0,0,0,4,0,0],[0,8,0,0,2,9,1,0,0]]

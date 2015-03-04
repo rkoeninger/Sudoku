@@ -1,6 +1,7 @@
 {-# LANGUAGE TupleSections #-}
 
 import Data.Set (Set, fromList, toList, size, singleton, difference, unions)
+import qualified Data.Set as S (map)
 import Data.List (nub, minimumBy)
 import Data.Maybe (catMaybes, listToMaybe, fromJust)
 import Data.Function (on)
@@ -12,6 +13,9 @@ numValues = size allValues
 
 type Cell = Set Value
 isDecided = (1 ==) . size
+
+flatSet :: (Ord a) => Set (Set a) -> Set a
+flatSet = unions . toList
 
 singleMaybe :: Set a -> Maybe a
 singleMaybe s
@@ -40,6 +44,13 @@ zipWithCoords = zipWith zip gridCoords
 
 getAt :: Grid -> (Int, Int) -> Cell
 getAt grid (r, c) = (grid !! r) !! c
+
+replaceNth n newVal (x:xs)
+    | n == 0 = newVal:xs
+    | otherwise = x:replaceNth (n-1) newVal xs
+
+setAt :: Grid -> (Int, Int) -> Value -> Grid
+setAt grid (r, c) val = replaceNth r (replaceNth c (singleton val) (grid !! r)) grid
 
 reduceCell :: [Cell] -> Cell -> Cell
 reduceCell otherCells cell = cell `difference` (decidedValues otherCells)
@@ -96,12 +107,19 @@ compareBranchCoords grid = compareBranchCells `on` (getAt grid)
 findBranchCoords :: Grid -> (Int, Int)
 findBranchCoords grid = minimumBy (compareBranchCoords grid) (concat gridCoords)
 
-branch :: Grid -> [Grid]
-branch = error "not implemented"
+branch :: Grid -> Set Grid
+branch grid = S.map assume (getAt grid branchCoords)
+	where branchCoords = findBranchCoords grid
+	      assume val = setAt grid branchCoords val
 
 solveMaybe :: Grid -> Maybe Grid
 solveMaybe grid = if isSolved reducedGrid then Just reducedGrid else Nothing
 	where reducedGrid = reduceDeduce grid
+
+solve :: Grid -> Set Grid
+solve grid = if isSolved grid' then singleton grid' else grids
+	where grid' = reduceDeduce grid
+	      grids = flatSet $ S.map solve (branch grid')
 
 -- Test Code
 

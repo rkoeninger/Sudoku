@@ -1,42 +1,30 @@
-# sudoku
+# Sudoku Solver
 
-Sudoku solver written in Haskell. Based on something much uglier that I wrote in C#.
+Branching sudoku solver written in Haskell. Given an input grid, this program will find all possible solutions or determine if no solution exists.
 
-I've had to introduce some vocabulary:
+## Problem Description
 
-"box" - One of the nine 3x3 sections on the grid.
-"group" - A row, column or box.
-"related cells" - The set all of the cells in the same row, column and box as a given cell, without the given cell.
-"decided cell" - A cell is decided when it has been reduced to one possible value. That value is the "decided value".
+A sudoku puzzle is modeled as a grid with a set of remaining possible values in each cell. When a puzzle is loaded, each of the cells with an initial value has its set of possible values reduced to only that initial value. The cells with no value provided are populated with all nine possible values.
 
-Solves puzzles using two basic operations (and these probably need better names):
+A grid is structured in 27 groups: nine rows, nine columns and nine 3x3 boxes. Each cell is a member of 3 groups: one row, one column and one box. The related cells of `x` are all the cells in all of `x`'s groups besides `x`. Each cell has exactly 20 related cells.
 
-"reduce" - for each cell, find all other related cells that have been reduced to one possible value and remove those possible values from the current cell.
+A solved grid has only one possible value remaining in each cell and no value appears more than once in any group.
 
-"deduce" - for each cell, if it has a value that no other related cell can be, make the current cell that value.
+## Solution Approach
 
-"Branching" will also have to be introduced for puzzles that aren't so easy. Sometimes a puzzle will reduce/deduce down to where there are two cells in the same group that have the same two possible values. In this case, the solver will have to branch on both possibilies (cellX=1, cellY=2 and cellX=2, cellY=1). Continue reducing both grids. One will likely be a dead end where a cell ends up with no possible values. The other will lead to the solution.
+Given the invariants of a sudoku puzzle, a few operations can be used to reliably reduce the values in a cell:
 
-Here's a test grid and the solution the solver comes up with and the "validate" function returns true for:
+  * Reduction - If there is a cell `x` that has been reduced to a single value, that value can be removed from all of `x`'s related cells.
+  * Deduction - If there is a cell `x` that is the only cell in a group with a particular value, it can immediately reduced to that single value.
 
-[[0,0,7,1,8,0,0,4,0],
- [0,0,4,0,0,0,8,0,0],
- [8,0,0,0,0,6,2,5,0],
- [0,4,0,0,9,8,7,1,0],
- [1,0,0,3,0,5,0,0,6],
- [0,9,5,2,1,0,0,8,0],
- [0,2,1,7,0,0,0,0,8],
- [0,0,3,0,0,0,4,0,0],
- [0,8,0,0,2,9,1,0,0]]
+For some puzzles, the above operations will not completely reduce the grid to a solved state. For example, there could be two cells in the group which have the same two possible values remaining. In this case, the grid will be branched. The solver will progress in two directions (or however many directions are necessary) by arbitrarily setting one of the irreducible cells to a different value remaining for that cell. Then reduction/deduction can continue until the grid is solved or another branch must be made.
 
-[[5,3,7,1,8,2,6,4,9],
- [2,6,4,9,5,3,8,7,1],
- [8,1,9,4,7,6,2,5,3],
- [3,4,2,6,9,8,7,1,5],
- [1,7,8,3,4,5,9,2,6],
- [6,9,5,2,1,7,3,8,4],
- [9,2,1,7,3,4,5,6,8],
- [7,5,3,8,6,1,4,9,2],
- [4,8,6,5,2,9,1,3,7]]
+If a branches is reduced to an invalid state, it is abandoned. All branches that ultimately result in a valid, solved grid are solutions to the input grid.
 
-The zeroes in the input grid get translated into a set of all nine possible values before solving begins. The non-zero values are translated to single-value sets.
+A grid is invalid if any cells have been reduced to zero possible values or if any two cells in the same group have only the same, single possible value remaining. An invalid grid cannot progress to a solved state.
+
+## Future Work
+
+The solver currently does not have any kind of user interface. The code has to be directly edited to input a puzzle.
+
+A better interface would need be needed for anyone who doesn't want to edit Haskell syntax. But what would really be impressive would be a mobile app that could OCR a printed puzzle from the newspaper or wherever and immediately display the solution(s).

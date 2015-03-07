@@ -1,5 +1,9 @@
 {-# LANGUAGE TupleSections #-}
 
+module Sudoku (
+	module Sudoku
+) where
+
 import Data.Set (Set, fromList, toList, size, singleton, difference, unions)
 import qualified Data.Set as S (map)
 import Data.List (nub, minimumBy)
@@ -112,83 +116,7 @@ branch grid = S.map assume (getAt grid branchCoords)
 	where branchCoords = findBranchCoords grid
 	      assume val = setAt grid branchCoords val
 
-solveMaybe :: Grid -> Maybe Grid
-solveMaybe grid = if isSolved reducedGrid then Just reducedGrid else Nothing
-	where reducedGrid = reduceDeduce grid
-
 solve :: Grid -> Set Grid
 solve grid = if isSolved grid' then singleton grid' else grids
 	where grid' = reduceDeduce grid
 	      grids = flatSet $ S.map solve (branch grid')
-
--- Test Code
-
-asValues :: [[Int]] -> Grid
-asValues vals = (map . map) interpretVal vals
-	where interpretVal x = case x of
-		0 -> allValues
-		_ -> singleton (listValues !! (x - 1))
-
-asInts :: Grid -> [[Int]]
-asInts grid = (map . map) interpretVal grid
-	where interpretVal x = case fromJust (singleMaybe x) of
-		A -> 1
-		B -> 2
-		C -> 3
-		D -> 4
-		E -> 5
-		F -> 6
-		G -> 7
-		H -> 8
-		I -> 9
-
-solveMaybeAsInts :: Grid -> Maybe [[Int]]
-solveMaybeAsInts = fmap asInts . solveMaybe
-
-singleSolution = asValues
-	[[9,0,0,5,0,0,2,0,3],
-     [0,0,0,0,7,3,0,0,0],
-     [4,0,5,0,0,0,9,0,0],
-     [0,2,0,4,0,8,0,0,7],
-     [0,5,0,0,6,0,0,3,0],
-     [6,0,0,7,0,2,0,4,0],
-     [0,0,2,0,0,0,6,0,1],
-     [0,0,0,3,2,0,0,0,0],
-     [8,0,1,0,0,7,0,0,5]]
-
-multipleSolutions = asValues
-    [[9,0,0,5,0,0,2,0,3],
-     [0,0,0,0,7,3,0,0,0],
-     [0,0,5,0,0,0,9,0,0],
-     [0,2,0,4,0,8,0,0,7],
-     [0,5,0,0,6,0,0,3,0],
-     [6,0,0,7,0,2,0,0,0],
-     [0,0,2,0,0,0,6,0,1],
-     [0,0,0,3,2,0,0,0,0],
-     [8,0,1,0,0,7,0,0,5]]
-
-noSolutions = asValues
-    [[9,0,0,5,0,0,2,0,3],
-     [0,0,0,0,7,3,0,0,0],
-     [0,0,5,0,0,0,9,0,0],
-     [0,2,0,4,0,8,0,0,7],
-     [0,5,0,0,6,0,0,3,0],
-     [6,0,0,7,0,2,0,0,0],
-     [0,1,2,0,0,0,6,0,1],
-     [0,0,0,3,2,0,0,0,0],
-     [8,0,0,0,0,7,0,0,5]]
-
-{-
-
-testGrid_ = asValues
-	[[0,0,0,0,0,0,0,0,0],
-     [0,0,0,0,0,0,0,0,0],
-     [0,0,0,0,0,0,0,0,0],
-     [0,0,0,0,0,0,0,0,0],
-     [0,0,0,0,0,0,0,0,0],
-     [0,0,0,0,0,0,0,0,0],
-     [0,0,0,0,0,0,0,0,0],
-     [0,0,0,0,0,0,0,0,0],
-     [0,0,0,0,0,0,0,0,0]]
-
--}

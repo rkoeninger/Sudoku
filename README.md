@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/rkoeninger/sudoku.svg?branch=master)](https://travis-ci.org/rkoeninger/sudoku)
+
 # Sudoku Solver
 
 Branching sudoku solver written in Haskell. Given an input grid, this program will find all possible solutions or determine if no solution exists.

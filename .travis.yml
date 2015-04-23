@@ -1,4 +1,3 @@
 language: haskell
-script:
-  - cabal build
-  - cabal test
+install: cabal install
+script: cabal test

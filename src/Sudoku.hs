@@ -7,8 +7,12 @@ module Sudoku (
 import Data.Set (Set, fromList, toList, size, singleton, difference, unions)
 import qualified Data.Set as S (map)
 import Data.List (nub, minimumBy)
-import Data.Maybe (catMaybes, listToMaybe, fromJust)
+import Data.Maybe (catMaybes, listToMaybe)
 import Data.Function (on)
+import Data.Tuple (swap)
+
+notEmpty :: Set a -> Bool
+notEmpty = (/= 0) . size
 
 data Value = A | B | C | D | E | F | G | H | I deriving (Eq, Ord, Show, Read)
 listValues = [A, B, C, D, E, F, G, H, I]
@@ -37,11 +41,11 @@ relatedGroups rc@(r, c) = map (filter (/= rc)) [row, col, box]
 	where row = map (r,) allIndicies
 	      col = map (,c) allIndicies
 	      box = [(x, y) | x <- box3 r, y <- box3 c]
-relatedCoords rc = nub $ concat $ relatedGroups rc
+relatedCoords = nub . concat . relatedGroups
 allGroups = rows ++ cols ++ boxes
 	where rows = gridCoords
-	      cols = map (zipWith ($) (map (,) allIndicies) . replicate 9) allIndicies
-	      boxes = map (\i -> [(x, y) | x <- box3 ((div i 3) * 3), y <- box3 ((div i 3) * 3)]) allIndicies
+	      cols = (map . map) swap gridCoords
+	      boxes = map (\i -> [(x, y) | x <- box3 i, y <- box3 i]) allIndicies
 
 type Grid = [[Cell]]
 zipWithCoords = zipWith zip gridCoords
@@ -82,9 +86,6 @@ reduceDeduce grid = result
 	where nextGrid = deduceGrid (reduceGrid grid)
 	      result | grid == nextGrid = grid
 	             | otherwise = reduceDeduce nextGrid
-
-notEmpty :: Set a -> Bool
-notEmpty = (/= 0) . size
 
 isValid :: Grid -> Bool
 isValid grid = noneEmpty && allValid

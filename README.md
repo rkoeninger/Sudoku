@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/rkoeninger/sudoku.svg?branch=master)](https://travis-ci.org/rkoeninger/sudoku)
+[![Build Status](https://travis-ci.org/rkoeninger/Sudoku.svg?branch=master)](https://travis-ci.org/rkoeninger/Sudoku)
 
 # Sudoku Solver
 
